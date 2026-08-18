@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartWare – Intelligent Warehouse Operations Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- ========== WAREHOUSE THEMED BACKGROUND ========== -->
+  <div class="bg-mesh">
+    <!-- Main warehouse interior - HIGHLY VISIBLE -->
+    <div class="absolute inset-0" style="
+      background-image: url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1920&q=85');
+      background-size: cover;
+      background-position: center 35%;
+      filter: brightness(0.75) contrast(1.08) saturate(1.05);
+    "></div>
+    <!-- Logistics / forklift secondary layer -->
+    <div class="absolute inset-0" style="
+      background-image: url('https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55?auto=format&fit=crop&w=1600&q=80');
+      background-size: cover;
+      background-position: left center;
+      opacity: 0.35;
+      mix-blend-mode: overlay;
+    "></div>
+    <!-- Light overlay - warehouse clearly visible, text still readable -->
+    <div class="absolute inset-0" style="
+      background: linear-gradient(
+        160deg,
+        rgba(6, 11, 20, 0.55) 0%,
+        rgba(8, 15, 28, 0.40) 30%,
+        rgba(6, 11, 20, 0.50) 65%,
+        rgba(6, 11, 20, 0.62) 100%
+      );
+    "></div>
+    <!-- Soft edge vignette -->
+    <div class="absolute inset-0" style="
+      background: radial-gradient(ellipse 85% 75% at 50% 45%, transparent 30%, rgba(6,11,20,0.35) 100%);
+    "></div>
+  </div>
+<div class="app-shell">
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon">
+          <i data-lucide="warehouse" class="w-5 h-5 text-white"></i>
+        </div>
+        <div class="logo-text">
+          <h1>SmartWare</h1>
+          <p>Ops Platform</p>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <button class="nav-item active" data-view="dashboard">
+          <i data-lucide="layout-dashboard" class="w-4.5 h-4.5"></i>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-item" data-view="orders">
+          <i data-lucide="shopping-cart" class="w-4.5 h-4.5"></i>
+          <span>Orders</span>
+        </button>
+        <button class="nav-item" data-view="inventory">
+          <i data-lucide="package" class="w-4.5 h-4.5"></i>
+          <span>Inventory</span>
+        </button>
+        <button class="nav-item" data-view="picking">
+          <i data-lucide="clipboard-list" class="w-4.5 h-4.5"></i>
+          <span>Picking</span>
+        </button>
+        <button class="nav-item" data-view="analytics">
+          <i data-lucide="bar-chart-3" class="w-4.5 h-4.5"></i>
+          <span>Analytics</span>
+        </button>
+        <button class="nav-item" data-view="exceptions">
+          <i data-lucide="alert-octagon" class="w-4.5 h-4.5"></i>
+          <span>Exceptions</span>
+          <span id="exception-badge" class="nav-badge">0</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="live-pill">
+          <span class="live-dot"></span>
+          <span>Live Mode</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ========== MAIN ========== -->
+    <div class="main-content">
+      <header class="topbar">
+        <h2 class="page-title" id="page-title">Dashboard</h2>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <button id="simulate-btn" class="btn btn-primary btn-sm">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            Simulate Order
+          </button>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <!-- DASHBOARD -->
+        <section id="view-dashboard" class="view-section active">
+          <div class="kpi-grid" id="kpi-grid">
+            <div class="kpi">
+              <div class="kpi-icon" style="background:rgba(56,189,248,0.15)"><i data-lucide="shopping-cart" class="w-4 h-4 text-sky-400"></i></div>
+              <div class="kpi-label">Open Orders</div>
+              <div class="kpi-value" id="kpi-open-orders">0</div>
+              <div class="kpi-sub"><span id="kpi-urgent" class="text-amber-400">0</span> urgent</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-icon" style="background:rgba(34,211,238,0.15)"><i data-lucide="package-search" class="w-4 h-4 text-cyan-400"></i></div>
+              <div class="kpi-label">In Picking</div>
+              <div class="kpi-value" id="kpi-picking">0</div>
+              <div class="kpi-sub">active waves</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-icon" style="background:rgba(52,211,153,0.15)"><i data-lucide="truck" class="w-4 h-4 text-emerald-400"></i></div>
+              <div class="kpi-label">Ready to Ship</div>
+              <div class="kpi-value" id="kpi-ready">0</div>
+              <div class="kpi-sub">packed & QC done</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-icon" style="background:rgba(251,191,36,0.15)"><i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i></div>
+              <div class="kpi-label">Low Stock SKUs</div>
+              <div class="kpi-value text-amber-400" id="kpi-lowstock">0</div>
+              <div class="kpi-sub">needs reorder</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-icon" style="background:rgba(248,113,113,0.15)"><i data-lucide="alert-octagon" class="w-4 h-4 text-red-400"></i></div>
+              <div class="kpi-label">Exceptions</div>
+              <div class="kpi-value text-red-400" id="kpi-exceptions">0</div>
+              <div class="kpi-sub">require decision</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-icon" style="background:rgba(52,211,153,0.15)"><i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i></div>
+              <div class="kpi-label">Fulfillment Rate</div>
+              <div class="kpi-value text-emerald-400" id="kpi-fulfill">98%</div>
+              <div class="kpi-sub">last 24h</div>
+            </div>
+          </div>
+
+          <!-- Decision Banner -->
+          <div id="decision-banner" class="decision-banner">
+            <div style="width:44px;height:44px;border-radius:12px;background:rgba(251,191,36,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i data-lucide="brain" class="w-5 h-5 text-amber-400"></i>
+            </div>
+            <div style="flex:1;">
+              <h3 style="font-weight:600;color:#fde68a;margin-bottom:0.35rem;">Smart Decision Required</h3>
+              <p id="decision-text" style="font-size:0.875rem;color:#cbd5e1;"></p>
+              <div id="decision-actions" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.85rem;"></div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:1.25rem;margin-bottom:1.5rem;">
+            <div class="glass">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                <h3 style="font-family:'Space Grotesk',sans-serif;font-weight:600;">Live Order Pipeline</h3>
+                <span style="font-size:0.7rem;color:var(--text-muted);">Auto-prioritized</span>
+              </div>
+              <div id="pipeline-list" class="custom-scroll" style="max-height:400px;overflow-y:auto;"></div>
+            </div>
+            <div class="glass">
+              <h3 style="font-family:'Space Grotesk',sans-serif;font-weight:600;margin-bottom:1rem;">System Activity</h3>
+              <div id="activity-feed" class="custom-scroll" style="max-height:400px;overflow-y:auto;"></div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+            <div class="glass">
+              <h3 style="font-family:'Space Grotesk',sans-serif;font-weight:600;margin-bottom:1rem;">Orders by Status</h3>
+              <div style="height:220px;"><canvas id="statusChart"></canvas></div>
+            </div>
+            <div class="glass">
+              <h3 style="font-family:'Space Grotesk',sans-serif;font-weight:600;margin-bottom:1rem;">Inventory Health</h3>
+              <div style="height:220px;"><canvas id="inventoryChart"></canvas></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ORDERS -->
+        <section id="view-orders" class="view-section">
+          <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+            <div>
+              <h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.4rem;">Order Management</h2>
+              <p style="font-size:0.85rem;color:var(--text-muted);margin-top:0.25rem;">Priority scoring • Smart allocation • Exception handling</p>
+            </div>
+            <div style="display:flex;gap:0.5rem;">
+              <select id="order-filter" class="btn btn-ghost btn-sm" style="cursor:pointer;">
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="allocated">Allocated</option>
+                <option value="picking">Picking</option>
+                <option value="packing">Packing</option>
+                <option value="ready">Ready</option>
+                <option value="dispatched">Dispatched</option>
+                <option value="exception">Exception</option>
+              </select>
+              <button id="create-order-btn" class="btn btn-primary btn-sm">+ New Order</button>
+            </div>
+          </div>
+          <div class="glass table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Priority</th>
+                  <th>Items</th>
+                  <th>Status</th>
+                  <th>SLA</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- INVENTORY -->
+        <section id="view-inventory" class="view-section">
+          <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+            <div>
+              <h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.4rem;">Inventory & Stock</h2>
+              <p style="font-size:0.85rem;color:var(--text-muted);margin-top:0.25rem;">Real-time visibility • Low-stock alerts • Location tracking</p>
+            </div>
+            <div style="display:flex;gap:0.5rem;">
+              <input id="inv-search" type="text" placeholder="Search SKU or name..." class="btn btn-ghost btn-sm" style="width:180px;cursor:text;">
+              <select id="inv-filter" class="btn btn-ghost btn-sm" style="cursor:pointer;">
+                <option value="all">All</option>
+                <option value="low">Low Stock</option>
+                <option value="out">Out of Stock</option>
+                <option value="healthy">Healthy</option>
+              </select>
+            </div>
+          </div>
+          <div id="inventory-grid" class="inv-grid"></div>
+        </section>
+
+        <!-- PICKING -->
+        <section id="view-picking" class="view-section">
+          <div style="margin-bottom:1.25rem;">
+            <h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.4rem;">Picking & Packing</h2>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-top:0.25rem;">Optimized waves • Path suggestions • QC checklist</p>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+            <div class="glass">
+              <h3 style="font-weight:600;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+                <i data-lucide="list-checks" class="w-4 h-4 text-cyan-400"></i> Active Pick Waves
+              </h3>
+              <div id="pick-waves"></div>
+            </div>
+            <div class="glass">
+              <h3 style="font-weight:600;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+                <i data-lucide="package" class="w-4 h-4 text-emerald-400"></i> Packing Station
+              </h3>
+              <div id="packing-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ANALYTICS -->
+        <section id="view-analytics" class="view-section">
+          <div style="margin-bottom:1.25rem;">
+            <h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.4rem;">Operational Analytics</h2>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-top:0.25rem;">Bottleneck detection • Throughput • Recommendations</p>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;">
+            <div class="glass">
+              <h3 style="font-weight:600;margin-bottom:1rem;">Daily Throughput</h3>
+              <div style="height:240px;"><canvas id="throughputChart"></canvas></div>
+            </div>
+            <div class="glass">
+              <h3 style="font-weight:600;margin-bottom:1rem;">Bottleneck Heatmap</h3>
+              <div id="bottleneck-list"></div>
+            </div>
+          </div>
+          <div class="glass">
+            <h3 style="font-weight:600;margin-bottom:1rem;">AI Recommendations</h3>
+            <div id="recommendations" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;"></div>
+          </div>
+        </section>
+
+        <!-- EXCEPTIONS -->
+        <section id="view-exceptions" class="view-section">
+          <div style="margin-bottom:1.25rem;">
+            <h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.4rem;">Exception Handling</h2>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-top:0.25rem;">Damaged • Missing • Shortage • Smart resolution engine</p>
+          </div>
+          <div id="exceptions-list"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal-overlay">
+    <div class="modal-box">
+      <div style="padding:1.15rem 1.35rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <h3 id="modal-title" style="font-family:'Space Grotesk',sans-serif;font-weight:600;"></h3>
+        <button id="modal-close" class="btn btn-ghost btn-sm" style="padding:0.35rem;"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div id="modal-body" style="padding:1.35rem;"></div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-wrap"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
